@@ -32,7 +32,7 @@ main = Aff.launchAff_ do
 ## Caveats
 
 * Workers _must_ be top-level, with no other constraints or arguments.
-* Workers _must_ be exports.
+* Workers _must_ be exported.
 * Your Node app _must not_ be bundled.
 
 These invariants will be validated at runtime, and if they aren't met will
