@@ -9,10 +9,10 @@ module Node.WorkerBees.Aff.Pool
 
 import Prelude
 
-import Control.Parallel (parTraverse_)
+import Control.Parallel (parTraverse, parTraverse_)
 import Data.Array as Array
 import Data.Either (Either(..))
-import Data.Traversable (class Traversable, for, for_, sequence)
+import Data.Traversable (class Traversable, for_, sequence)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect.AVar (AVar)
 import Effect.Aff (Aff, Fiber, bracket, error, forkAff, killFiber)
@@ -94,4 +94,4 @@ poolTraverse
   -> f i
   -> Aff (f o)
 poolTraverse worker workerData numThreads fs =
-  withPool worker workerData numThreads (for fs <<< invoke)
+  withPool worker workerData numThreads (flip parTraverse fs <<< invoke)
