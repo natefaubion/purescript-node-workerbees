@@ -9,7 +9,7 @@ exports.spawnImpl = function(left, right, worker, options, cb) {
     var thread;
     try {
       thread = new workerThreads.Worker(
-        'require("' + res.filePath + '").' + res.export + '.spawn()',
+        'require("' + res.filePath.replace(/\\/g, "\\\\") + '").' + res.export + '.spawn()',
         {
           eval: true,
           workerData: options.workerData
