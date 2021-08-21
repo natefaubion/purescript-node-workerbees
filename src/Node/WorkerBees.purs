@@ -5,6 +5,9 @@ module Node.WorkerBees
   , Worker
   , ThreadId(..)
   , make
+  , makeAsMain
+  , unsafeWorkerFromPath
+  , unsafeWorkerFromPathAndExport
   , lift
   , liftReader
   , liftEffect
@@ -64,6 +67,10 @@ foreign import data WorkerThread :: Type -> Type
 
 foreign import makeImpl :: forall a i o. WorkerConstructor a i o -> Worker a i o
 
+foreign import unsafeMakeImpl :: forall a i o. { filePath :: String, export :: String } -> Worker a i o
+
+foreign import mainImpl :: forall a i o. WorkerConstructor a i o -> Effect Unit
+
 foreign import spawnImpl :: forall a i o. EffectFn5 (forall x y. x -> Either x y) (forall x y. y -> Either x y) (Worker a i o) (WorkerOptions a o) (Either Error (WorkerThread i) -> Effect Unit) Unit
 
 foreign import postImpl :: forall i. EffectFn2 i (WorkerThread i) Unit
@@ -76,21 +83,30 @@ foreign import threadId :: forall i. WorkerThread i -> ThreadId
 -- | syntax. Workers can only be declared at the top-level with `make`, and they
 -- | _must_ be exported. Failing to meet these criteria will result in a runtime
 -- | exception.
-make :: forall a i o . Sendable o => WorkerConstructor a i o -> Worker a i o
+make :: forall a i o. Sendable o => WorkerConstructor a i o -> Worker a i o
 make = makeImpl
+
+makeAsMain :: forall a i o. Sendable o => WorkerConstructor a i o -> Effect Unit
+makeAsMain = mainImpl
+
+unsafeWorkerFromPath :: forall a i o. Sendable o => String -> Worker a i o
+unsafeWorkerFromPath = unsafeMakeImpl <<< { filePath: _, export: "" }
+
+unsafeWorkerFromPathAndExport :: forall a i o. Sendable o => { filePath :: String, export :: String } -> Worker a i o
+unsafeWorkerFromPathAndExport = unsafeMakeImpl
 
 -- | Instantiates a new worker thread. If this worker subscribes to input, it
 -- | will need to be cleaned up with `terminate`, otherwise it will hold your
 -- | process open.
-spawn :: forall a i o . Sendable a => Worker a i o -> WorkerOptions a o -> (Either Error (WorkerThread i) -> Effect Unit) -> Effect Unit
+spawn :: forall a i o. Sendable a => Worker a i o -> WorkerOptions a o -> (Either Error (WorkerThread i) -> Effect Unit) -> Effect Unit
 spawn = runEffectFn5 spawnImpl Left Right
 
 -- | Sends some input to a worker thread to process.
-post :: forall i . Sendable i => i -> WorkerThread i -> Effect Unit
+post :: forall i. Sendable i => i -> WorkerThread i -> Effect Unit
 post = runEffectFn2 postImpl
 
 -- | Terminates the worker thread.
-terminate :: forall i . WorkerThread i -> (Either Error Unit -> Effect Unit) -> Effect Unit
+terminate :: forall i. WorkerThread i -> (Either Error Unit -> Effect Unit) -> Effect Unit
 terminate = runEffectFn4 terminateImpl Left Right
 
 -- | Only Sendable things can be sent back and forth between a worker thread and

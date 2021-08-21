@@ -7,14 +7,15 @@ exports.spawnImpl = function(left, right, worker, options, cb) {
       return cb(left(err))();
     }
     var thread;
+    var requirePath = res.filePath.replace(/\\/g, "\\\\");
+    var jsEval = res.export
+      ? 'require("' + requirePath + '").' + res.export + '.spawn()'
+      : 'require("' + requirePath + '")';
     try {
-      thread = new workerThreads.Worker(
-        'require("' + res.filePath.replace(/\\/g, "\\\\") + '").' + res.export + '.spawn()',
-        {
-          eval: true,
-          workerData: options.workerData
-        }
-      );
+      thread = new workerThreads.Worker(jsEval, {
+        eval: true,
+        workerData: options.workerData
+      });
       thread.on('message', function(value) {
         return options.onMessage(value)();
       });
@@ -95,7 +96,28 @@ exports.makeImpl = function(ctor) {
     });
   }
 
-  function spawn() {
+  return {
+    resolve: resolve,
+    spawn: mainImpl(ctor)
+  };
+};
+
+exports.unsafeMakeImpl = function(params) {
+  return {
+    resolve: function(cb) {
+      cb(void 0, params);
+    },
+    spawn: function() {
+      throw new Error("Cannot spawn unsafe worker directly.");
+    }
+  };
+};
+
+function mainImpl(ctor) {
+  return function() {
+    if (workerThreads.isMainThread) {
+      throw new Error("Worker running on main thread.");
+    }
     ctor({
       exit: function() {
         process.exit();
@@ -115,13 +137,10 @@ exports.makeImpl = function(ctor) {
       threadId: workerThreads.threadId,
       workerData: workerThreads.workerData
     })();
-  }
-
-  return {
-    resolve: resolve,
-    spawn: spawn
   };
-};
+}
+
+exports.mainImpl = mainImpl;
 
 exports.postImpl = function(value, worker) {
   worker.postMessage(value);
