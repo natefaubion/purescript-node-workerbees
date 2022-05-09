@@ -76,13 +76,14 @@ export function makeImpl(ctor) {
 
       var callerModuleLines = buff.toString('utf8').split('\n');
       var callerLine = callerModuleLines[callerLineNumber - 1];
-      var workerName = callerLine.match(new RegExp("^var ([\\p{Ll}_][\\p{L}0-9_']*) = Node_WorkerBees\\.make", "u"));
+      var workerName = callerLine.replace("/* #__PURE__ */ ", "").match(new RegExp("^var ([\\p{Ll}_][\\p{L}0-9_']*) = Node_WorkerBees\\.make", "u"));
 
       if (workerName) {
-        var exportRegex = new RegExp("^\\s*" + workerName[1] + ":\\s*" + workerName[1]);
+        var exportRegex = new RegExp("^\\s*" + workerName[1]);
         for (var i = callerLineNumber; i < callerModuleLines.length; i++) {
-          if (callerModuleLines[i] === "module.exports = {") {
+          if (callerModuleLines[i] === "export {") {
             var exported = callerModuleLines.slice(i).some(function(line) {
+              console.log(line)
               return exportRegex.test(line);
             });
             if (exported) {
