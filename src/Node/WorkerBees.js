@@ -10,13 +10,13 @@ export function spawnImpl(left, right, worker, options, cb) {
       return cb(left(err))();
     }
     var thread;
-    var requirePath = res.filePath.replace(/\\/g, "\\\\");
+    var importPath = res.filePath.replace(/\\/g, "\\\\");
     var jsEval = res.export
       ? [
-          'var worker = require("' + requirePath + '").' + res.export + ';',
-          'worker.spawn ? worker.spawn() : worker();'
+          'import { ' + res.export + ' } from "' + importPath + ';',
+          res.export + '.spawn ? ' + res.export + '.spawn() : ' + res.export + '();'
         ].join('\n')
-      : 'require("' + requirePath + '")';
+      : 'import * from "' + importPath + '"';
     try {
       thread = new workerThreads.Worker(jsEval, {
         eval: true,
@@ -83,7 +83,6 @@ export function makeImpl(ctor) {
         for (var i = callerLineNumber; i < callerModuleLines.length; i++) {
           if (callerModuleLines[i] === "export {") {
             var exported = callerModuleLines.slice(i).some(function(line) {
-              console.log(line)
               return exportRegex.test(line);
             });
             if (exported) {
