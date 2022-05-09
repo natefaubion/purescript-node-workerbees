@@ -1,5 +1,8 @@
 import fs from "fs";
 import workerThreads from "worker_threads";
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
 
 export function spawnImpl(left, right, worker, options, cb) {
   worker.resolve(function(err, res) {
@@ -50,15 +53,14 @@ export function makeImpl(ctor) {
 
     do {
       var frame = stack.shift();
-      callerFilePath = frame.getFileName();
+      callerFilePath = frame.getFileName().replace("file://", "");
       callerLineNumber = frame.getLineNumber();
     } while (callerFilePath === __filename);
 
     Error.prepareStackTrace = originalFn;
-
   } catch (e) {
     Error.prepareStackTrace = originalFn;
-    throw new Error("Unable to define worker.");
+    throw new Error("Unable to define worker:", e);
   }
 
   function resolve(cb) {
