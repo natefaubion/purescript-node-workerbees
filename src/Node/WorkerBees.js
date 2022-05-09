@@ -1,7 +1,7 @@
-var fs = require("fs");
-var workerThreads = require("worker_threads");
+import fs from "fs";
+import workerThreads from "worker_threads";
 
-exports.spawnImpl = function(left, right, worker, options, cb) {
+export function spawnImpl(left, right, worker, options, cb) {
   worker.resolve(function(err, res) {
     if (err) {
       return cb(left(err))();
@@ -35,9 +35,9 @@ exports.spawnImpl = function(left, right, worker, options, cb) {
       cb(left(e))();
     }
   });
-};
+}
 
-exports.makeImpl = function(ctor) {
+export function makeImpl(ctor) {
   var originalFn = Error.prepareStackTrace;
   var worker, workerError, callerFilePath, callerLineNumber;
 
@@ -103,9 +103,9 @@ exports.makeImpl = function(ctor) {
     resolve: resolve,
     spawn: mainImpl(ctor)
   };
-};
+}
 
-exports.unsafeMakeImpl = function(params) {
+export function unsafeMakeImpl(params) {
   return {
     resolve: function(cb) {
       cb(void 0, params);
@@ -114,7 +114,7 @@ exports.unsafeMakeImpl = function(params) {
       throw new Error("Cannot spawn unsafe worker directly.");
     }
   };
-};
+}
 
 function mainImpl(ctor) {
   return function() {
@@ -143,13 +143,13 @@ function mainImpl(ctor) {
   };
 }
 
-exports.mainImpl = mainImpl;
+export {mainImpl};
 
-exports.postImpl = function(value, worker) {
+export function postImpl(value, worker) {
   worker.postMessage(value);
-};
+}
 
-exports.terminateImpl = function(left, right, worker, cb) {
+export function terminateImpl(left, right, worker, cb) {
   worker.terminate()
     .then(function() {
       cb(right(void 0))();
@@ -157,8 +157,8 @@ exports.terminateImpl = function(left, right, worker, cb) {
     .catch(function(err) {
       cb(left(err))();
     });
-};
+}
 
-exports.threadId = function(worker) {
+export function threadId(worker) {
   return worker.threadId;
-};
+}
