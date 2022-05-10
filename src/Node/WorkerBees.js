@@ -2,7 +2,7 @@ import fs from "fs";
 import workerThreads from "worker_threads";
 import { fileURLToPath } from 'url'
 
-const __filename = fileURLToPath(import.meta.url)
+var __filename = fileURLToPath(import.meta.url)
 
 export function spawnImpl(left, right, worker, options, cb) {
   worker.resolve(function(err, res) {
@@ -10,16 +10,18 @@ export function spawnImpl(left, right, worker, options, cb) {
       return cb(left(err))();
     }
     var thread;
-    var importPath = res.filePath.replace(/\\/g, "\\\\");
+    var importPath = "file://" + res.filePath.replace(/\\/g, "\\\\");
     var jsEval = res.export
       ? [
-          'import { ' + res.export + ' } from "' + importPath + ';',
+          'import { ' + res.export + ' } from "' + importPath + '";',
           res.export + '.spawn ? ' + res.export + '.spawn() : ' + res.export + '();'
         ].join('\n')
       : 'import * from "' + importPath + '"';
     try {
-      thread = new workerThreads.Worker(jsEval, {
-        eval: true,
+      thread = new workerThreads.Worker(new URL('data:text/javascript, ' + jsEval), {
+        // TypeError [ERR_INVALID_ARG_VALUE]: The property 'options.eval' must 
+        // be false when 'filename' is not a string. Received true.
+        eval: false,
         workerData: options.workerData
       });
       thread.on('message', function(value) {
