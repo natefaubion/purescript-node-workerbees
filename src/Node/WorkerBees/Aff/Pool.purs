@@ -63,7 +63,7 @@ terminate (WorkerPool { queue, threads }) = do
   for_ pending (AVar.kill termError <<< snd)
 
 -- | Submits a new input to the worker pool, and waits for the reply.
-invoke :: forall i o . Sendable i => WorkerPool i o -> i -> Aff o
+invoke :: forall i o. Sendable i => WorkerPool i o -> i -> Aff o
 invoke (WorkerPool { queue }) i = do
   res <- AVar.empty
   AVar.put (Tuple i res) queue

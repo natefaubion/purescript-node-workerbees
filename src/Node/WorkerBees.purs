@@ -4,10 +4,8 @@ module Node.WorkerBees
   , WorkerOptions
   , Worker
   , ThreadId(..)
-  , make
   , makeAsMain
   , unsafeWorkerFromPath
-  , unsafeWorkerFromPathAndExport
   , lift
   , liftReader
   , liftEffect
@@ -65,9 +63,7 @@ foreign import data Worker :: Type -> Type -> Type -> Type
 
 foreign import data WorkerThread :: Type -> Type
 
-foreign import makeImpl :: forall a i o. WorkerConstructor a i o -> Worker a i o
-
-foreign import unsafeMakeImpl :: forall a i o. { filePath :: String, export :: String } -> Worker a i o
+foreign import unsafeMakeImpl :: forall a i o. { filePath :: String } -> Worker a i o
 
 foreign import mainImpl :: forall a i o. WorkerConstructor a i o -> Effect Unit
 
@@ -79,21 +75,22 @@ foreign import terminateImpl :: forall i. EffectFn4 (forall x y. x -> Either x y
 
 foreign import threadId :: forall i. WorkerThread i -> ThreadId
 
--- | Builds a new Worker. Treat this like it's special top-level declaration
--- | syntax. Workers can only be declared at the top-level with `make`, and they
--- | _must_ be exported. Failing to meet these criteria will result in a runtime
--- | exception.
-make :: forall a i o. Sendable o => WorkerConstructor a i o -> Worker a i o
-make = makeImpl
-
+-- | Implements the worker code that can later be called via the
+-- | `unsafeWorkerFromPath` function. This code _must_ be bundled such that
+-- | `main` is actually called in the file.
 makeAsMain :: forall a i o. Sendable o => WorkerConstructor a i o -> Effect Unit
 makeAsMain = mainImpl
 
+-- | Builds a new worker given a path to the compiled code constituting the `main`
+-- | function that should execute in the worker. The worker code should be created
+-- | using `makeAsMain`. The path must be either an absolute path or a relative
+-- | path that begins with ./ or ../
+-- |
+-- | ```purs
+-- | unsafeWorkerFromPath "./output/My.Bundled.Output/index.js"
+-- | ```
 unsafeWorkerFromPath :: forall a i o. Sendable o => String -> Worker a i o
-unsafeWorkerFromPath = unsafeMakeImpl <<< { filePath: _, export: "" }
-
-unsafeWorkerFromPathAndExport :: forall a i o. Sendable o => { filePath :: String, export :: String } -> Worker a i o
-unsafeWorkerFromPathAndExport = unsafeMakeImpl
+unsafeWorkerFromPath = unsafeMakeImpl <<< { filePath: _ }
 
 -- | Instantiates a new worker thread. If this worker subscribes to input, it
 -- | will need to be cleaned up with `terminate`, otherwise it will hold your
