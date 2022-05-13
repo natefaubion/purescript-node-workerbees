@@ -15,8 +15,8 @@ main = Aff.launchAff_ do
   Console.log "Main..."
 
   let
-    worker :: Worker Number Int String
+    worker :: Worker Unit Int String
     worker = Worker.unsafeWorkerFromPath "./output/Test.Worker.js"
 
-  res <- WorkerPool.poolTraverse worker 10.0 1 (Array.range 1 100)
+  res <- WorkerPool.poolTraverse worker unit 1 (Array.range 1 100)
   Console.logShow res
