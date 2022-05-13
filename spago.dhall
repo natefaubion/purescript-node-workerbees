@@ -11,6 +11,7 @@
   , "exceptions"
   , "foldable-traversable"
   , "foreign-object"
+  , "integers"
   , "newtype"
   , "parallel"
   , "prelude"

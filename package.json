@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:bundle": "spago bundle-app --main Test.Worker --to output/Test.Worker.js --platform node",
+    "test": "npm run test:bundle && spago test"
+  },
+  "devDependencies": {
+    "esbuild": "^0.14.39"
+  }
+}

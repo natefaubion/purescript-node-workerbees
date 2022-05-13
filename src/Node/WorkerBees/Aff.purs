@@ -45,7 +45,7 @@ post :: forall i. Sendable i => i -> WorkerThread i -> Aff Unit
 post i = liftEffect <<< Worker.post i
 
 -- | Terminates the worker thread.
-terminate :: forall i . WorkerThread i -> Aff Unit
+terminate :: forall i. WorkerThread i -> Aff Unit
 terminate worker = invincible $ makeAff \k -> do
   Worker.terminate worker k
   pure mempty
