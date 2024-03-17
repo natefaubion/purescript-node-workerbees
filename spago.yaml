@@ -1,0 +1,28 @@
+package:
+  dependencies:
+    - aff
+    - argonaut-core
+    - arraybuffer-types
+    - arrays
+    - avar
+    - effect
+    - either
+    - exceptions
+    - foldable-traversable
+    - foreign-object
+    - newtype
+    - parallel
+    - prelude
+    - transformers
+    - tuples
+    - variant
+  name: node-workerbees
+  test:
+    main: Test.Main
+    dependencies:
+      - console
+      - integers
+workspace:
+  extra_packages: {}
+  package_set:
+    registry: 50.4.0

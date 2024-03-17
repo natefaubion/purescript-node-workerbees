@@ -12,13 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: purescript-contrib/setup-purescript@main
+      # - uses: purescript-contrib/setup-purescript@main
+      - uses: srghma/setup-purescript@main
 
       - name: Install esbuild
         run: npm install
 
       - name: Build source
-        run: spago build
+        run: spago build --pedantic-packages
 
       - name: Run tests
         run: npm run test
