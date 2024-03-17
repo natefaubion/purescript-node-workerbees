@@ -19,7 +19,7 @@ jobs:
         run: npm install
 
       - name: Build source
-        run: spago build
+        run: spago build --pedantic-packages
 
       - name: Run tests
         run: npm run test
