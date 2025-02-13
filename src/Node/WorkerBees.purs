@@ -4,6 +4,7 @@ module Node.WorkerBees
   , WorkerOptions
   , Worker
   , ThreadId(..)
+  , threadId
   , makeAsMain
   , unsafeWorkerFromPath
   , lift
@@ -73,7 +74,7 @@ foreign import postImpl :: forall i. EffectFn2 i (WorkerThread i) Unit
 
 foreign import terminateImpl :: forall i. EffectFn4 (forall x y. x -> Either x y) (forall x y. y -> Either x y) (WorkerThread i) (Either Error Unit -> Effect Unit) Unit
 
-foreign import threadId :: forall i. WorkerThread i -> ThreadId
+foreign import threadId :: forall i. WorkerThread i -> Effect ThreadId
 
 -- | Implements the worker code that can later be called via the
 -- | `unsafeWorkerFromPath` function. This code _must_ be bundled such that
