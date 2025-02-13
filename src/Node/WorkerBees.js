@@ -85,5 +85,7 @@ export function terminateImpl(left, right, worker, cb) {
 }
 
 export function threadId(worker) {
-  return worker.threadId;
+  return function() {
+    return worker.threadId;
+  };
 }

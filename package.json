@@ -2,10 +2,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:bundle": "spago bundle-app --main Test.Worker --to output/Test.Worker.js --platform node",
-    "test": "npm run test:bundle && spago test"
+    "test:bundle": "spago bundle --bundle-type app --module Test.Worker --outfile output/Test.Worker.js --platform node",
+    "test": "npm run test:bundle && spago test",
+    "format": "purs-tidy format-in-place src test",
+    "format:check": "purs-tidy check src test"
   },
   "devDependencies": {
-    "esbuild": "^0.14.39"
+    "esbuild": "^0.24.2",
+    "purescript": "^0.15.15",
+    "purs-tidy": "^0.11.0",
+    "spago": "^0.93.42"
   }
 }
