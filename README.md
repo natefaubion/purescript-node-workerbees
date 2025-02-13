@@ -1,12 +1,37 @@
 # purescript-node-workerbees
 
-An opinionated, convenient set of bindings to Node's `worker_threads` API.
+An opinionated, unsafe set of bindings to Node's `worker_threads` API.
 Use `workerbees` to distribute work over multiple _actual_ threads instead of
 that fiber bullshit `Aff` gives you.
 
 Also, there's has an `Aff`-based API that makes it even more convenient.
 
 ## Example
+
+Start by creating a worker module:
+
+```purescript
+module Worker where
+
+import Prelude
+
+import Effect (Effect)
+import Node.WorkerBees as Worker
+
+main :: Effect Unit
+main = Worker.makeAsMain (Worker.lift doSomethingReallyExpensive)
+  where
+  doSomethingReallyExpensive :: Int -> String
+  doSomethingReallyExpensive = ???
+```
+
+Then bundle your worker with `spago`:
+
+```sh
+spago bundle --bundle-type app --module Worker --outfile worker.js --platform node
+```
+
+Write your main module:
 
 ``` purescript
 import Prelude
@@ -19,21 +44,19 @@ import Node.WorkerBees (Worker)
 import Node.WorkerBees as Worker
 import Node.WorkerBees.Aff.Pool as WorkerPool
 
-worker :: Worker Unit Int String
-worker = Worker.make (Worker.lift ?doSomethingReallyExpensive)
-
 main :: Effect Unit
 main = Aff.launchAff_ do
+  let
+    worker :: Worker Unit
+    worker = Worker.unsafeWorkerFromPath "./worker.js"
+
   -- Distributes work over 4 threads.
   res <- WorkerPool.poolTraverse worker unit 4 (Array.range 1 100)
   Console.logShow res
 ```
 
-## Caveats
+Run your main module:
 
-* Workers _must_ be top-level, with no other constraints or arguments.
-* Workers _must_ be exported.
-* Your Node app _must not_ be bundled.
-
-These invariants will be validated at runtime, and if they aren't met will
-result in a runtime exception.
+```sh
+spago run
+```
