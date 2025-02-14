@@ -39,7 +39,7 @@
               "newtype": ">=5.0.0 <6.0.0"
             },
             {
-              "parallel": ">=6.0.0 <7.0.0"
+              "parallel": ">=6.0.0 <8.0.0"
             },
             {
               "prelude": ">=6.0.1 <7.0.0"
@@ -567,8 +567,8 @@
     },
     "parallel": {
       "type": "registry",
-      "version": "6.0.0",
-      "integrity": "sha256-VJbkGD0rAKX+NUEeBJbYJ78bEKaZbgow+QwQEfPB6ko=",
+      "version": "7.0.0",
+      "integrity": "sha256-gUC9i4Txnx9K9RcMLsjujbwZz6BB1bnE2MLvw4GIw5o=",
       "dependencies": [
         "control",
         "effect",
