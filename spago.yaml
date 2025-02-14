@@ -2,7 +2,7 @@ package:
   name: node-workerbees
   description: Convenient multi-threading on Node.
   publish:
-    version: 0.3.0
+    version: 0.3.1
     license: MIT
     location:
       githubOwner: natefaubion
